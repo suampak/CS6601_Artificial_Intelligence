@@ -1,5 +1,6 @@
 import random
 import copy
+import timeit
 
 class IsolationGame:
     def __init__(self, m, n, isP1):
@@ -36,7 +37,7 @@ class IsolationGame:
             ret.append('\n')
         return ''.join(ret)
 
-    def run(self, mode = 'mymoves', depth = 5):
+    def run(self, mode = 'mymoves-w-iter', depth = 5, timeout = 2):
         m = len(self.isVisited)
         n = len(self.isVisited[0])
         print 'Start {}x{} Isolation Game...\n'.format(m,n)
@@ -53,8 +54,10 @@ class IsolationGame:
                     i, j = self.__calNextMoveRandom()
                 elif mode == 'mymoves':
                     args = [self.isVisited, self.p1]
-                    i, j = self.__calNextMoveWithEval(depth, IsolationGame.myMoves, \
-                                                      args)
+                    i, j = self.__calNextMoveWithEval(depth, IsolationGame.myMoves, args)
+                elif mode == 'mymoves-w-iter':
+                    args = [self.isVisited, self.p1]
+                    i, j = self.__calNextMoveWithEvalIter(timeout, IsolationGame.myMoves,args)
                 print 'Opponent chose {},{}'.format(i,j)
             print self
         if self.isP1:
@@ -94,7 +97,7 @@ class IsolationGame:
 
         return self.__calNextMoveRandom()
 
-    def __calNextMoveWithEval(self, depth, eval, args):
+    def __calNextMoveWithEval(self, depth, eval, args, update = True):
         pos = self.p1 if self.isP1 else self.p2
         prevPos = [pos[0],pos[1]]
         minmax = float('inf')
@@ -114,6 +117,29 @@ class IsolationGame:
             pos[0] = prevPos[0]
             pos[1] = prevPos[1]
 
+        if update:
+            self.isP1 = not self.isP1
+            self.isVisited[ret[0]][ret[1]] = True
+            pos[0] = ret[0]
+            pos[1] = ret[1]
+            self.nextMoves = self.__generateAllMoves()
+        return ret
+
+    def __calNextMoveWithEvalIter(self, timeout, eval, args):
+        depth = 1
+        ret = [-1,-1]
+        elapsed = 0
+        # total time + time expected for next call = elapsed + 2*elapsed
+        while 3*elapsed < timeout:
+            start = timeit.default_timer()
+            prevRet = ret
+            ret = self.__calNextMoveWithEval(depth, eval, args, False)
+            if prevRet == ret:
+                break
+            depth += 1
+            elapsed += (timeit.default_timer()-start)
+
+        pos = self.p1 if self.isP1 else self.p2
         self.isP1 = not self.isP1
         self.isVisited[ret[0]][ret[1]] = True
         pos[0] = ret[0]
@@ -222,8 +248,8 @@ class IsolationGame:
         return len(IsolationGame.generateAllMovesImpl(isVisited, pos))
 
 '''test'''
-m = 5
-n = 5
+m = 10
+n = 10
 P1Start = True
 game = IsolationGame(m,n,P1Start)
 game.run()
