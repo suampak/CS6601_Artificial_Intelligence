@@ -263,9 +263,10 @@ class IsolationGame:
         isVisited, pos = args
         return len(IsolationGame.generateAllMovesImpl(isVisited, pos))
 
-'''test'''
-m = 4
-n = 4
-P1Start = True
-game = IsolationGame(m,n,P1Start)
-game.run()
+if __name__ == '__main__':
+    '''test'''
+    m = 4
+    n = 4
+    P1Start = True
+    game = IsolationGame(m,n,P1Start)
+    game.run()
