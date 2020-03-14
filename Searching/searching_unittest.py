@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 
 from explorable_graph import ExplorableGraph
 from priority_queue import PriorityQueue
-from searching import breadth_first_search
+from searching import breadth_first_search, uniform_cost_search, \
+                      euclidean_dist_heuristic, a_star
 
 class TestPriorityQueue(unittest.TestCase):
     def test_append_and_pop(self):
@@ -44,6 +45,34 @@ class TestBasicSearch(unittest.TestCase):
 
         self.romania.reset_search()
         path = breadth_first_search(self.romania, start, goal)
+
+        self.draw_graph(self.romania, node_positions=node_positions,
+                        start=start, goal=goal, path=path)
+
+    def test_ucs(self):
+        """TTest and visualize uniform-cost search"""
+        start = 'a'
+        goal = 'u'
+
+        node_positions = {n: self.romania.node[n]['pos'] for n in
+                          self.romania.node.keys()}
+
+        self.romania.reset_search()
+        path = uniform_cost_search(self.romania, start, goal)
+
+        self.draw_graph(self.romania, node_positions=node_positions,
+                        start=start, goal=goal, path=path)
+
+    def test_a_star(self):
+        """Test and visualize A* search"""
+        start = 'a'
+        goal = 'u'
+
+        node_positions = {n: self.romania.node[n]['pos'] for n in
+                          self.romania.node.keys()}
+
+        self.romania.reset_search()
+        path = a_star(self.romania, start, goal)
 
         self.draw_graph(self.romania, node_positions=node_positions,
                         start=start, goal=goal, path=path)
