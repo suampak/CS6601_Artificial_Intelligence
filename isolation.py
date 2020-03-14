@@ -125,12 +125,12 @@ class IsolationGame:
             self.nextMoves = self.__generateAllMoves()
         return ret
 
-    def __calNextMoveWithEvalIter(self, timeout, eval, args):
+    def __calNextMoveWithEvalIter(self, timeout, eval, args, factor = 2):
         depth = 1
         ret = [-1,-1]
         elapsed = 0
-        # total time + time expected for next call = elapsed + 2*elapsed
-        while 3*elapsed < timeout:
+        # total time + time expected for next call = elapsed + factor*elapsed
+        while (1+factor)*elapsed < timeout:
             start = timeit.default_timer()
             prevRet = ret
             ret = self.__calNextMoveWithEval(depth, eval, args, False)
@@ -190,7 +190,8 @@ class IsolationGame:
         return isP1
 
     @staticmethod
-    def calNextMoveWithEvalImpl(isVisited, p1, p2, isP1, depth, eval, args):
+    def calNextMoveWithEvalImpl(isVisited, p1, p2, isP1, depth, eval, args, \
+                                bound = {'alpha': float('inf'), 'beta': 0}):
         pos = p1 if isP1 else p2
         allMoves = IsolationGame.generateAllMovesImpl(isVisited, pos)
         if depth == 0 or len(allMoves) == 0:
@@ -203,11 +204,26 @@ class IsolationGame:
             isVisited[nexti][nextj] = True
             pos[0] = nexti
             pos[1] = nextj
-            val = IsolationGame.calNextMoveWithEvalImpl(isVisited, p1, p2, not isP1, depth-1, eval, args)
-            maxmin = max(maxmin,val) if isP1 else min(maxmin,val)
+            alpha = bound['alpha']
+            beta = bound['beta']
+            val = IsolationGame.calNextMoveWithEvalImpl(isVisited, p1, p2, not isP1, \
+                                                        depth-1, eval, args, \
+                                                        bound)
             isVisited[nexti][nextj] = False
             pos[0] = prevPos[0]
             pos[1] = prevPos[1]
+            maxmin = max(maxmin,val) if isP1 else min(maxmin,val)
+            if isP1 and val >= alpha:
+                return val
+            elif not isP1 and val <= beta:
+                return val
+
+        if isP1:
+            bound['alpha'] = maxmin
+            bound['beta'] = 0
+        else:
+            bound['alpha'] = float('inf')
+            bound['beta'] = maxmin
 
         return maxmin
 
@@ -248,8 +264,8 @@ class IsolationGame:
         return len(IsolationGame.generateAllMovesImpl(isVisited, pos))
 
 '''test'''
-m = 10
-n = 10
+m = 4
+n = 4
 P1Start = True
 game = IsolationGame(m,n,P1Start)
 game.run()
