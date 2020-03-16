@@ -30,7 +30,7 @@ class PriorityQueue(object):
         self.index = 0
 
     def top(self):
-        return self.queue[0][1]
+        return self.queue[0]
 
     def __fixUp(self, index):
         pa = (index-1)>>1
