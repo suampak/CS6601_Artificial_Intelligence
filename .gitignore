@@ -1,4 +1,6 @@
 *.pyc
+*.dot
+*.png
 
 # git clone https://github.com/achille/pbnt
 /Bayes_Net/pbnt
