@@ -4,25 +4,25 @@ import timeit
 
 class IsolationGame:
     def __init__(self, m, n, isP1):
-        '''
+        """
             INPUT
             m = row of board
             n = column of board
-        '''
+        """
         self.isVisited = [[False for j in range(n)] for i in range(m)]
-        '''
+        """
             p1 is actual player
             p2 is AI
-        '''
+        """
         self.p1 = [-1, -1]
         self.p2 = [-1, -1]
         self.isP1 = isP1
         self.nextMoves = self.__generateAllMoves()
 
     def __str__(self):
-        '''
+        """
             print the board with current status
-        '''
+        """
         ret = []
         for i in range(len(self.isVisited)):
             for j in range(len(self.isVisited[0])):
@@ -66,10 +66,10 @@ class IsolationGame:
             print 'Player wins :)'
 
     def __selMove(self, i, j):
-        '''
+        """
             check if the provided coordinate i, j is eligible for p1 (or p2)
             and change the board status accordingly
-        '''
+        """
         pos = self.p1 if self.isP1 else self.p2
         if [i,j] in self.nextMoves:
             self.isVisited[i][j] = True
@@ -161,15 +161,15 @@ class IsolationGame:
         pos = self.p1 if self.isP1 else self.p2
         return self.generateAllMovesImpl(self.isVisited, pos)
 
-    '''
+    """
         static method
-    '''
+    """
 
     @staticmethod
     def calNextMoveImpl(isVisited, p1, p2, isP1):
-        '''
+        """
             Return True if p1 loses
-        '''
+        """
         pos = p1 if isP1 else p2
         allMoves = IsolationGame.generateAllMovesImpl(isVisited, pos)
         if len(allMoves) == 0:
@@ -229,9 +229,9 @@ class IsolationGame:
 
     @staticmethod
     def generateAllMovesImpl(isVisited, pos):
-        '''
+        """
             generate all possible next moves for given position
-        '''
+        """
         curri, currj = pos
         ret = []
         if curri == -1 and currj == -1:
@@ -254,9 +254,9 @@ class IsolationGame:
                j >= 0 and j < len(isVisited[0]) and \
                not isVisited[i][j]
 
-    '''
+    """
         eval function
-    '''
+    """
 
     @staticmethod
     def myMoves(args):
@@ -264,7 +264,7 @@ class IsolationGame:
         return len(IsolationGame.generateAllMovesImpl(isVisited, pos))
 
 if __name__ == '__main__':
-    '''test'''
+    """test"""
     m = 4
     n = 4
     P1Start = True
