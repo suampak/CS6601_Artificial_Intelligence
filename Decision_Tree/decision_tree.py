@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 """
 
 class DecisionTree(object):
+    # TODO: use node in networkx from the very start
     class Node(object):
         def __init__(self, attr, value):
             self.attr_id = attr

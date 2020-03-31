@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from explorable_graph import ExplorableGraph
 from priority_queue import PriorityQueue
 from searching import breadth_first_search, uniform_cost_search, \
-                      euclidean_dist_heuristic, a_star
+                      euclidean_dist_heuristic, a_star, bidirectional_ucs
 
 class TestPriorityQueue(unittest.TestCase):
     def test_append_and_pop(self):
@@ -50,7 +50,7 @@ class TestBasicSearch(unittest.TestCase):
                         start=start, goal=goal, path=path)
 
     def test_ucs(self):
-        """TTest and visualize uniform-cost search"""
+        """Test and visualize uniform-cost search"""
         start = 'a'
         goal = 'u'
 
@@ -112,6 +112,30 @@ class TestBasicSearch(unittest.TestCase):
 
         plt.plot()
         plt.show()
+
+class TestBidirectionalSearch(unittest.TestCase):
+    """Test the bidirectional search algorithms: UCS, A*"""
+
+    def setUp(self):
+        """Load Atlanta map data"""
+        atlanta = pickle.load(open('atlanta_osm.pickle', 'rb'))
+        self.atlanta = ExplorableGraph(atlanta)
+        self.atlanta.reset_search()
+
+    def test_bidirectional_ucs(self):
+        """Test and generate GeoJSON for bidirectional UCS search"""
+        path = bidirectional_ucs(self.atlanta, '69581003', '69581000')
+        all_explored = self.atlanta.explored_nodes
+        plot_search(self.atlanta, 'atlanta_search_bidir_ucs.json', path,
+                    all_explored)
+
+    # def test_bidirectional_a_star(self):
+    #     """Test and generate GeoJSON for bidirectional A* search"""
+    #     path = bidirectional_a_star(self.atlanta, '69581003', '69581000')
+    #     all_explored = self.atlanta.explored_nodes
+    #     plot_search(self.atlanta, 'atlanta_search_bidir_a_star.json', path,
+    #                 all_explored)
+
 
 if __name__ == '__main__':
     unittest.main()

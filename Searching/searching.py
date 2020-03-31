@@ -108,3 +108,63 @@ def a_star(graph, start, goal, heuristic=euclidean_dist_heuristic):
                 queue.append((newDist, newPath))
 
     raise Error('No path from {} to {}').format(start, goal)
+
+def bidirectional_ucs(graph, start, goal):
+    """
+    Args:
+        graph (ExplorableGraph): Undirected graph to search.
+        start (str): Key for the start node.
+        goal (str): Key for the end node.
+
+    Returns:
+        The best path as a list from the start and goal nodes (including both).
+    """
+    if start == goal:
+        return []
+
+    queue_s = PriorityQueue()
+    queue_s.append((0, start, ''))
+    is_visited_s = {}
+    queue_g = PriorityQueue()
+    queue_g.append((0, goal, ''))
+    is_visited_g = {}
+    small = [float('inf'),'']
+
+    while queue_s.size()+queue_g.size() > 0:
+        dist_s, node_s, pa_s = queue_s.pop()
+        dist_g, node_g, pa_g = queue_g.pop()
+
+        if dist_s+dist_g >= small[0]:
+            node = small[1]
+            ret = [node]
+            ptr = node
+            while is_visited_s[ptr][1] != '':
+                ret.append(is_visited_s[ptr][1])
+                ptr = is_visited_s[ptr][1]
+            ret.reverse()
+
+            ptr = node
+            while is_visited_g[ptr][1] != '':
+                ret.append(is_visited_g[ptr][1])
+                ptr = is_visited_g[ptr][1]
+
+            return ret
+
+        """
+            forward/backward search
+        """
+        for is_visited, is_visited_other, node, dist, pa in \
+            [[is_visited_s, is_visited_g, node_s, dist_s, pa_s], \
+             [is_visited_g, is_visited_s, node_g, dist_g, pa_g]]:
+            if is_visited.get(node) is not None:
+                continue
+            is_visited[node] = [dist, pa]
+            if is_visited_other.get(node) is not None:
+                dist_cache, _ = is_visited_other[node]
+                if dist_cache+dist < small[0]:
+                    small = [dist_cache+dist, node]
+            else:
+                for dest in graph[node]:
+                    queue.append((dist+graph[node][dest]['weight'], dest, node))
+
+    raise Error('No path from {} to {}').format(start, goal)
