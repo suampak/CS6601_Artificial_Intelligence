@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 from explorable_graph import ExplorableGraph
 from priority_queue import PriorityQueue
 from searching import breadth_first_search, uniform_cost_search, \
-                      euclidean_dist_heuristic, a_star, bidirectional_ucs
+                      euclidean_dist_heuristic, a_star, bidirectional_ucs, \
+                      bidirectional_a_star
 
 class TestPriorityQueue(unittest.TestCase):
     def test_append_and_pop(self):
@@ -87,6 +88,20 @@ class TestBasicSearch(unittest.TestCase):
 
         self.romania.reset_search()
         path = bidirectional_ucs(self.romania, start, goal)
+
+        self.draw_graph(self.romania, node_positions=node_positions,
+                        start=start, goal=goal, path=path)
+
+    def test_bidirectional_a_star(self):
+        """Test and visualize bidirectional A* search"""
+        start = 'a'
+        goal = 'u'
+
+        node_positions = {n: self.romania.node[n]['pos'] for n in
+                          self.romania.node.keys()}
+
+        self.romania.reset_search()
+        path = bidirectional_a_star(self.romania, start, goal)
 
         self.draw_graph(self.romania, node_positions=node_positions,
                         start=start, goal=goal, path=path)

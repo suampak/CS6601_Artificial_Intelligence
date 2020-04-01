@@ -45,25 +45,7 @@ def uniform_cost_search(graph, start, goal):
     Returns:
         The best path as a list from the start and goal nodes (including both).
     """
-    if start == goal:
-        return []
-
-    queue = PriorityQueue()
-    queue.append((0, [start]))
-    isVisited = sets.Set()
-
-    while queue.size() > 0:
-        dist, nodes = queue.pop()
-        if nodes[-1] not in isVisited:
-            isVisited.add(nodes[-1])
-            if nodes[-1] == goal:
-                return nodes
-            for node in graph[nodes[-1]]:
-                newPath = copy.deepcopy(nodes)
-                newPath.append(node)
-                queue.append((dist+graph[nodes[-1]][node]['weight'], newPath))
-
-    raise Error('No path from {} to {}').format(start, goal)
+    return a_star(graph, start, goal, lambda G, s, g : 0)
 
 def euclidean_dist_heuristic(graph, v, goal):
     """
@@ -104,7 +86,7 @@ def a_star(graph, start, goal, heuristic=euclidean_dist_heuristic):
                 newPath = copy.deepcopy(nodes)
                 newPath.append(node)
                 newPath[0] += graph[nodes[-1]][node]['weight']
-                newDist = newPath[0]+heuristic(graph, nodes[-1], node)
+                newDist = newPath[0]+heuristic(graph, node, goal)
                 queue.append((newDist, newPath))
 
     raise Error('No path from {} to {}').format(start, goal)
@@ -119,22 +101,39 @@ def bidirectional_ucs(graph, start, goal):
     Returns:
         The best path as a list from the start and goal nodes (including both).
     """
+    return bidirectional_a_star(graph, start, goal, lambda G, s, g : 0)
+
+def bidirectional_a_star(graph, start, goal, heuristic=euclidean_dist_heuristic):
+    """
+    Args:
+        graph (ExplorableGraph): Undirected graph to search.
+        start (str): Key for the start node.
+        goal (str): Key for the end node.
+        heuristic: Function to determine distance heuristic.
+            Default: euclidean_dist_heuristic.
+
+    Returns:
+        The best path as a list from the start and goal nodes (including both).
+    """
     if start == goal:
         return []
 
     queue_s = PriorityQueue()
-    queue_s.append((0, start, ''))
+    queue_s.append((0, 0, start, ''))
     is_visited_s = {}
     queue_g = PriorityQueue()
-    queue_g.append((0, goal, ''))
+    queue_g.append((0, 0, goal, ''))
     is_visited_g = {}
     small = [float('inf'),'']
 
-    while queue_s.size()+queue_g.size() > 0:
-        dist_s, node_s, pa_s = queue_s.pop()
-        dist_g, node_g, pa_g = queue_g.pop()
+    p = lambda g, s, t, n : (heuristic(g, n, t)-heuristic(g, n, s)+heuristic(g, t, s))/2
 
-        if dist_s+dist_g >= small[0]:
+    while queue_s.size()+queue_g.size() > 0:
+        est_s, dist_s, node_s, pa_s = queue_s.pop()
+        est_g, dist_g, node_g, pa_g = queue_g.pop()
+
+        # not really sure about the ending criteria for a*
+        if est_s+est_g >= small[0]+2*p(graph, start, goal, start):
             node = small[1]
             ret = [node]
             ptr = node
@@ -153,9 +152,9 @@ def bidirectional_ucs(graph, start, goal):
         """
             forward/backward search
         """
-        for queue, is_visited, is_visited_other, node, dist, pa in \
-            [[queue_s, is_visited_s, is_visited_g, node_s, dist_s, pa_s], \
-             [queue_g, is_visited_g, is_visited_s, node_g, dist_g, pa_g]]:
+        for queue, is_visited, is_visited_other, node, dist, pa, t, s in \
+            [[queue_s, is_visited_s, is_visited_g, node_s, dist_s, pa_s, goal, start], \
+             [queue_g, is_visited_g, is_visited_s, node_g, dist_g, pa_g, start, goal]]:
             if is_visited.get(node) is not None:
                 continue
             is_visited[node] = [dist, pa]
@@ -165,6 +164,8 @@ def bidirectional_ucs(graph, start, goal):
                     small = [dist_cache+dist, node]
             else:
                 for dest in graph[node]:
-                    queue.append((dist+graph[node][dest]['weight'], dest, node))
+                    new_dist = dist+graph[node][dest]['weight']
+                    new_heuristic = p(graph,s,t,dest)
+                    queue.append((new_dist+new_heuristic, new_dist, dest, node))
 
     raise Error('No path from {} to {}').format(start, goal)
