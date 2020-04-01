@@ -153,9 +153,9 @@ def bidirectional_ucs(graph, start, goal):
         """
             forward/backward search
         """
-        for is_visited, is_visited_other, node, dist, pa in \
-            [[is_visited_s, is_visited_g, node_s, dist_s, pa_s], \
-             [is_visited_g, is_visited_s, node_g, dist_g, pa_g]]:
+        for queue, is_visited, is_visited_other, node, dist, pa in \
+            [[queue_s, is_visited_s, is_visited_g, node_s, dist_s, pa_s], \
+             [queue_g, is_visited_g, is_visited_s, node_g, dist_g, pa_g]]:
             if is_visited.get(node) is not None:
                 continue
             is_visited[node] = [dist, pa]

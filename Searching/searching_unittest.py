@@ -77,6 +77,20 @@ class TestBasicSearch(unittest.TestCase):
         self.draw_graph(self.romania, node_positions=node_positions,
                         start=start, goal=goal, path=path)
 
+    def test_bidirectional_ucs(self):
+        """Test and visualize bidirectional UCS search"""
+        start = 'a'
+        goal = 'u'
+
+        node_positions = {n: self.romania.node[n]['pos'] for n in
+                          self.romania.node.keys()}
+
+        self.romania.reset_search()
+        path = bidirectional_ucs(self.romania, start, goal)
+
+        self.draw_graph(self.romania, node_positions=node_positions,
+                        start=start, goal=goal, path=path)
+
     @staticmethod
     def draw_graph(graph, node_positions=None, start=None, goal=None,
                    path=None):
@@ -112,30 +126,6 @@ class TestBasicSearch(unittest.TestCase):
 
         plt.plot()
         plt.show()
-
-class TestBidirectionalSearch(unittest.TestCase):
-    """Test the bidirectional search algorithms: UCS, A*"""
-
-    def setUp(self):
-        """Load Atlanta map data"""
-        atlanta = pickle.load(open('atlanta_osm.pickle', 'rb'))
-        self.atlanta = ExplorableGraph(atlanta)
-        self.atlanta.reset_search()
-
-    def test_bidirectional_ucs(self):
-        """Test and generate GeoJSON for bidirectional UCS search"""
-        path = bidirectional_ucs(self.atlanta, '69581003', '69581000')
-        all_explored = self.atlanta.explored_nodes
-        plot_search(self.atlanta, 'atlanta_search_bidir_ucs.json', path,
-                    all_explored)
-
-    # def test_bidirectional_a_star(self):
-    #     """Test and generate GeoJSON for bidirectional A* search"""
-    #     path = bidirectional_a_star(self.atlanta, '69581003', '69581000')
-    #     all_explored = self.atlanta.explored_nodes
-    #     plot_search(self.atlanta, 'atlanta_search_bidir_a_star.json', path,
-    #                 all_explored)
-
 
 if __name__ == '__main__':
     unittest.main()
